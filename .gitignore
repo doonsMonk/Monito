@@ -10,6 +10,8 @@
 .cxx/
 *.apk
 *.aab
+# ...except the published builds
+!/release/*.apk
 
 # IDE / tooling
 /.kotlin/

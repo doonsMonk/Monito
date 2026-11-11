@@ -7,6 +7,17 @@ the old app **and full compatibility with its data**: the same `MonitoDB.sqlite`
 
 Built with Kotlin, Jetpack Compose (Material 3), plain SQLite, and WorkManager. Minimum Android 8.0 (API 26).
 
+## Download and install
+
+The latest build is in the [release](release/) folder of this repository:
+
+- [Monito-9.0.apk](https://github.com/doonsMonk/Monito/raw/main/release/Monito-9.0.apk)
+
+On the phone, download the file, open it, and allow installing from this source when Android asks.
+Later versions install over the existing app and keep its data. The build is signed with the
+development key of the machine that produced it, which is fine for personal use; a store release
+would need its own keystore.
+
 ## Moving your data from the old app
 
 Pick whichever file you can get hold of; the **Import backup file…** button on *Settings → View / Restore

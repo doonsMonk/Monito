@@ -21,6 +21,10 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Personal, side-loaded app: sign releases with the local debug key so updates install over
+            // the existing app and the Drive OAuth client (registered for that key's SHA-1) keeps working.
+            // Switch to a dedicated keystore before any store distribution.
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
