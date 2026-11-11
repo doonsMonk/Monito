@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Monito</string>
+    <string name="expense_manager">Expense Manager</string>
+
+    <!-- Navigation -->
+    <string name="transactions">Transactions</string>
+    <string name="graphs">Graphs</string>
+    <string name="transactions_and_graphs">Transactions &amp; Graphs</string>
+    <string name="categories">Categories</string>
+    <string name="recurrings">Recurrings</string>
+    <string name="trash">Trash</string>
+    <string name="settings">Settings</string>
+    <string name="search">Search</string>
+    <string name="about_monito">About Monito</string>
+    <string name="back">Back</string>
+    <string name="menu">Menu</string>
+    <string name="more">More</string>
+
+    <!-- Transactions -->
+    <string name="add_transaction">Add transaction</string>
+    <string name="edit_transaction">Edit transaction</string>
+    <string name="total_income">Total income</string>
+    <string name="total_expense">Total expense</string>
+    <string name="balance">Balance</string>
+    <string name="carry_forward">Carry Forward</string>
+    <string name="balance_with_cf">Balance with C/F</string>
+    <string name="no_transactions">No transactions</string>
+    <string name="msg_no_trans">Add a transaction,\nor try changing the time period.</string>
+    <string name="auto_added_by_recurring">Auto added by recurring</string>
+    <string name="transaction_added">Transaction added</string>
+    <string name="transaction_modified">Transaction modified</string>
+    <string name="transaction_moved_to_trash">Transaction moved to Trash</string>
+    <string name="transaction_restored">Transaction restored</string>
+    <string name="transaction_deleted_permanently">Transaction deleted permanently</string>
+    <string name="amount">Amount</string>
+    <string name="enter_amount">Enter amount</string>
+    <string name="category">Category</string>
+    <string name="select_category">Select category</string>
+    <string name="date">Date</string>
+    <string name="select_date">Select date</string>
+    <string name="note">Note</string>
+    <string name="note_optional">Note (optional)</string>
+    <string name="add_photo">Add photo</string>
+    <string name="attached_photo">Attached photo</string>
+    <string name="take_photo">Take a photo</string>
+    <string name="choose_image">Choose image</string>
+    <string name="remove">Remove</string>
+    <string name="remove_this_photo">Remove this photo?</string>
+    <string name="error_amt_cant_be_empty">Amount can\'t be empty</string>
+    <string name="error_amt_is_invalid">Amount is invalid</string>
+    <string name="error_amt_should_greater_than_zero">Amount should be greater than 0</string>
+    <string name="error_cat_cant_be_empty">Category can\'t be empty</string>
+    <string name="error_date_cant_be_empty">Date can\'t be empty</string>
+    <string name="please_add_category_before_adding_record">Please add a category before adding a record.</string>
+    <string name="delete">Delete</string>
+    <string name="delete_forever">Delete forever</string>
+    <string name="restore">Restore</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="okay">Okay</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="total">Total</string>
+    <string name="search_transactions">Search transactions</string>
+    <string name="clear">Clear</string>
+    <string name="clear_search">Clear search</string>
+    <string name="details">%1$s details</string>
+
+    <!-- Time period -->
+    <string name="change_time_period">Change time period</string>
+    <string name="selected_time_period">Selected time period</string>
+    <string name="this_month">This month</string>
+    <string name="last_month">Last month</string>
+    <string name="last_3_months">Last 3 months</string>
+    <string name="last_6_months">Last 6 months</string>
+    <string name="all_time">All time</string>
+    <string name="custom">Custom…</string>
+    <string name="set_custom_time_period">Set custom time period</string>
+    <string name="start_date">Start date</string>
+    <string name="end_date">End date</string>
+    <string name="select_start_date">Select start date</string>
+    <string name="select_end_date">Select end date</string>
+    <string name="set">Set</string>
+    <string name="previous_month">Previous period</string>
+    <string name="next_month">Next period</string>
+    <string name="specific_month_hint">Use the arrows under the title to move month by month.</string>
+    <string name="print">Print…</string>
+    <string name="print_report">Print report</string>
+    <string name="print_description">Prints the transactions of the selected time period. Change the time period first to print a different month or a custom range.</string>
+    <string name="group_by_month">Group by month</string>
+    <string name="page_per_month">Start each month on a new page</string>
+    <string name="print_failed">Printing is not available on this device</string>
+
+    <!-- Graphs -->
+    <string name="expense">Expense</string>
+    <string name="income">Income</string>
+    <string name="no_expenses">No expenses</string>
+    <string name="no_incomes">No incomes</string>
+
+    <!-- Categories -->
+    <string name="add_category">Add category</string>
+    <string name="edit_category">Edit category</string>
+    <string name="category_name">Category name</string>
+    <string name="category_type">Category type</string>
+    <string name="select_category_type">Select category type</string>
+    <string name="choose_color">Choose color</string>
+    <string name="favorite_category">Set as favorite</string>
+    <string name="no_categories">No categories</string>
+    <string name="msg_to_add_cat">Categories are used to group similar types of transactions. For example Food, Shopping, Salary etc.</string>
+    <string name="category_added">Category added</string>
+    <string name="category_modified">Category modified</string>
+    <string name="category_deleted">Category deleted</string>
+    <string name="delete_category">Delete category</string>
+    <string name="delete_this_category_records_will_be_moved">If you delete this category, all the associated records will be moved under \'%1$s\'.\n\nDelete anyway?</string>
+    <string name="error_cat_name_cant_be_empty">Category name can\'t be empty</string>
+    <string name="error_cat_already_exists">Category with this name already exists</string>
+    <string name="transactions_count">%1$d transactions</string>
+
+    <!-- Recurrings -->
+    <string name="add_recurring">Add recurring</string>
+    <string name="edit_recurring">Edit recurring</string>
+    <string name="no_recurrings">No recurrings</string>
+    <string name="msg_to_add_recurring">Recurrings can automatically add your repeating transactions, such as, House rent, salary etc.</string>
+    <string name="recurring_added">Recurring added</string>
+    <string name="recurring_modified">Recurring modified</string>
+    <string name="recurring_deleted">Recurring deleted</string>
+    <string name="delete_recurring">Delete recurring</string>
+    <string name="delete_this_recurring_you_cannot_undo_this">Delete this recurring? You can\'t undo this delete.</string>
+    <string name="repeat">Repeat</string>
+    <string name="repeat_type">Repeat type</string>
+    <string name="every_day">Everyday</string>
+    <string name="every_day_at">Everyday at %1$s</string>
+    <string name="every_week">Every week</string>
+    <string name="every_week_on">Every week on %1$s</string>
+    <string name="every_month">Every month</string>
+    <string name="of_every_month">%1$s of every month</string>
+    <string name="every_year">Every year</string>
+    <string name="every_year_on">Every year on %1$s</string>
+    <string name="time">Time</string>
+    <string name="select_day">Select day</string>
+    <string name="next_run">Next: %1$s</string>
+    <string name="error_select_repeat_interval">Select repeat interval</string>
+    <string name="error_select_repeat_time">Select repeat time</string>
+
+    <!-- Trash -->
+    <string name="msg_empty_trash">Your deleted transactions appear here.</string>
+    <string name="trash_is_empty">Trash is empty</string>
+    <string name="clear_trash">Clear Trash</string>
+    <string name="trash_cleared">Trash cleared</string>
+    <string name="clear_all_records_from_trash">This will clear all the records from Trash. You can\'t undo this operation.\n\nClear anyway?</string>
+    <string name="choose_action">Choose action</string>
+    <string name="deleted_on">Deleted on %1$s</string>
+    <string name="delete_photo_from_phone">Delete photo from phone</string>
+
+    <!-- Settings -->
+    <string name="currency">Currency</string>
+    <string name="change_currency">Change currency</string>
+    <string name="currency_symbol">Currency symbol</string>
+    <string name="show_symbol_on">Show symbol on</string>
+    <string name="left_side">Left side</string>
+    <string name="right_side">Right side</string>
+    <string name="decimal_separator">Decimal separator</string>
+    <string name="thousand_separator">Thousand separator</string>
+    <string name="dot">Dot</string>
+    <string name="comma">Comma</string>
+    <string name="space">Space</string>
+    <string name="none">None</string>
+    <string name="preview">Preview</string>
+    <string name="show_carry_forward">Show Carry Forward</string>
+    <string name="startup">Startup</string>
+    <string name="what_would_you_like_to_see_first">What would you like to see first after opening Monito?</string>
+    <string name="theme">Theme</string>
+    <string name="system_default">System default</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="alerts">Alerts</string>
+    <string name="daily_reminder">Daily reminder</string>
+    <string name="daily_reminder_notif_channel_description">These settings will apply to the notification which you get as a \'Daily Reminder\'.</string>
+    <string name="remind_me">Remind me</string>
+    <string name="you_will_be_reminded">You\'ll be reminded to add your daily expenses</string>
+    <string name="you_will_get_notification_around">You\'ll get a notification around %1$s</string>
+    <string name="select_notification_time">Select notification time</string>
+    <string name="its_time_to_add_today_expenses">It\'s time to add today\'s expenses.</string>
+    <string name="backup">Backup</string>
+    <string name="backup_data">Backup data</string>
+    <string name="auto_backup_my_data">Automatically backup my data</string>
+    <string name="will_backup_data_everyday">Monito will backup your data everyday</string>
+    <string name="backup_my_data_now">Backup my data now</string>
+    <string name="manually_backup_data">Manually backup your data</string>
+    <string name="backup_file_name">Backup file name</string>
+    <string name="new_backup_will_be_created_with_following_name">New backup will be created with the following name. You can change it if you want.</string>
+    <string name="backup_successful">Backup successful</string>
+    <string name="error_could_not_create_backup">Couldn\'t create a backup</string>
+    <string name="view_restore_backups">View / Restore backups</string>
+    <string name="restore_backup">Restore backup</string>
+    <string name="restoring_will_erase_data">This will erase all your current data. Your new data will be restored from the backup.\n\nRestore anyway?</string>
+    <string name="backup_restored_successfully">Backup restored successfully</string>
+    <string name="error_restore_failed">Restore failed. The file is not a Monito backup.</string>
+    <string name="delete_backup">Delete backup</string>
+    <string name="backup_will_be_deleted">The backup will be deleted and the data in it will be lost forever.\n\nDelete anyway?</string>
+    <string name="backup_deleted_successfully">Backup deleted successfully</string>
+    <string name="error_backup_delete_failed">Backup delete failed</string>
+    <string name="no_backups_on_phone">No backups on phone</string>
+    <string name="phone_storage">Phone Storage</string>
+    <string name="import_backup_file">Import backup file…</string>
+    <string name="import_backup_help">Restore a .monitobk file created by this app or by the old Monito Expense Manager (found in the \'Monito/backups\' folder of your phone storage or in \'Monito/backups\' on your Google Drive), or a raw MonitoDB.sqlite file.</string>
+    <string name="export_backup">Export backup file</string>
+    <string name="share">Share</string>
+    <string name="created_on">Created on %1$s</string>
+    <string name="auto_delete_transactions">Auto-delete transactions</string>
+    <string name="trash_transaction_auto_deleted">Automatically delete the transactions that have been in Trash for more than 7 days</string>
+    <string name="security">Security</string>
+    <string name="screen_lock">Screen lock</string>
+    <string name="confirm_your_pin">Confirm your PIN, pattern or password. You can also use fingerprint if supported.</string>
+    <string name="no_screen_is_set_for_device">No screen lock is set for your device. Please enable PIN/Pattern/Password in phone\'s Settings and try again.</string>
+    <string name="unlock_monito">Unlock Monito</string>
+    <string name="confirm_your_identity">Confirm your identity</string>
+    <string name="hide_content">Hide contents in \'Recent apps\'</string>
+    <string name="this_will_also_prevent_screenshots">This will also prevent screenshots</string>
+    <string name="export">Export</string>
+    <string name="export_to_excel">Export to Excel…</string>
+    <string name="transactions_will_be_exported_month_wise">Transactions of the selected time period will be exported month-wise.</string>
+    <string name="export_successful">Export successful</string>
+    <string name="export_failed">Export failed</string>
+    <string name="about_dialog_text">Version %1$s\nDatabase version %2$s\n\nA rebuild of Monito Expense Manager that keeps working with the original database and backups.</string>
+    <string name="advanced_options">Advanced options</string>
+
+    <!-- First run -->
+    <string name="welcome">Welcome to Monito</string>
+    <string name="existing_user">Existing user?</string>
+    <string name="existing_user_desc">Restore the backup from your old Monito app and continue where you left off.</string>
+    <string name="start_from_here">Start from here</string>
+    <string name="start_fresh_desc">Begin with an empty book. You can set an opening balance now or later.</string>
+    <string name="opening_balance">Opening balance</string>
+    <string name="opening_balance_optional">Opening balance (optional)</string>
+    <string name="got_it">Got it!</string>
+    <string name="skip">Skip</string>
+    <string name="next">Next</string>
+    <string name="permission_notifications_needed">Allow notifications to receive the daily reminder.</string>
+    <string name="unknown_error_occurred">Unknown error occurred</string>
+
+    <!-- Recurrings (smarter) -->
+    <string name="recurring_notif_channel_description">Shown when a recurring transaction is added automatically.</string>
+    <string name="end_date_optional">End date (optional)</string>
+    <string name="no_end_date">No end date</string>
+    <string name="ends_on">Ends on %1$s</string>
+    <string name="ended">Ended</string>
+    <string name="upcoming_dates">Upcoming dates</string>
+    <string name="skip_next">Skip next</string>
+    <string name="next_occurrence_skipped">Next occurrence skipped</string>
+    <string name="clear_end_date">Clear end date</string>
+
+    <!-- Swipe, duplicate -->
+    <string name="undo">Undo</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="edit">Edit</string>
+    <string name="transaction_duplicated">Transaction duplicated</string>
+
+    <!-- Templates -->
+    <string name="quick_templates">Quick templates</string>
+    <string name="templates_desc">Save the transactions you add often and prefill them with one tap.</string>
+    <string name="no_templates">No templates yet</string>
+    <string name="add_template">Add template</string>
+    <string name="edit_template">Edit template</string>
+    <string name="template_name">Template name</string>
+    <string name="save_as_template">Save as template</string>
+    <string name="template_saved">Template saved</string>
+    <string name="template_deleted">Template deleted</string>
+    <string name="error_template_name_cant_be_empty">Template name can\'t be empty</string>
+    <string name="manage_templates">Manage templates…</string>
+    <string name="amount_optional">Amount (optional)</string>
+    <string name="category_optional">Category (optional)</string>
+
+    <!-- Search filters -->
+    <string name="filters">Filters</string>
+    <string name="clear_filters">Clear filters</string>
+    <string name="any_type">Any type</string>
+    <string name="categories_selected">%1$d categories</string>
+    <string name="amount_range">Amount range</string>
+    <string name="min_amount">Minimum</string>
+    <string name="max_amount">Maximum</string>
+    <string name="date_range">Date range</string>
+    <string name="with_photo">With photo</string>
+    <string name="tags">Tags</string>
+    <string name="tags_hint">Write #tags in notes to find transactions by tag.</string>
+    <string name="results_count">%1$d results</string>
+    <string name="any_date">Any date</string>
+
+    <!-- Budgets -->
+    <string name="budgets">Budgets</string>
+    <string name="budgets_desc">Set a monthly limit per expense category and watch how much is left.</string>
+    <string name="no_budget">No budget</string>
+    <string name="set_budget">Set budget</string>
+    <string name="monthly_budget">Monthly budget</string>
+    <string name="remove_budget">Remove budget</string>
+    <string name="budget_saved">Budget saved</string>
+    <string name="spent_of">%1$s of %2$s</string>
+    <string name="left">%1$s left</string>
+    <string name="over_budget_by">Over by %1$s</string>
+    <string name="total_budget">Total budget</string>
+    <string name="total_spent">Spent this month</string>
+    <string name="left_label">Left</string>
+    <string name="over_label">Over budget</string>
+    <string name="no_expense_categories">Add an expense category first.</string>
+
+    <!-- Trends -->
+    <string name="trends">Trends</string>
+    <string name="income_vs_expense">Income vs expense</string>
+    <string name="last_12_months">Last 12 months</string>
+    <string name="year_summary">Year summary</string>
+    <string name="by_category">By category</string>
+    <string name="previous_year">Previous year</string>
+    <string name="next_year">Next year</string>
+    <string name="average">Average</string>
+    <string name="months_with_data">%1$d months with data</string>
+
+    <!-- Google Drive -->
+    <string name="google_drive">Google Drive</string>
+    <string name="drive_desc">Keep encrypted copies of your data in your own Google Drive and restore them on any device.</string>
+    <string name="drive_not_linked">Not linked</string>
+    <string name="drive_linked">Linked</string>
+    <string name="link_drive">Link Google Drive</string>
+    <string name="unlink_drive">Unlink</string>
+    <string name="drive_passphrase">Encryption passphrase</string>
+    <string name="drive_passphrase_desc">Everything uploaded is encrypted with this passphrase before it leaves the phone. You will need the same passphrase to restore on another device. If you forget it, the Drive copies cannot be read.</string>
+    <string name="set_passphrase">Set passphrase</string>
+    <string name="change_passphrase">Change passphrase</string>
+    <string name="passphrase_set">Passphrase set</string>
+    <string name="passphrase_not_set">No passphrase set</string>
+    <string name="confirm_passphrase">Confirm passphrase</string>
+    <string name="error_passphrases_differ">Passphrases do not match</string>
+    <string name="error_passphrase_too_short">Use at least 8 characters</string>
+    <string name="upload_now">Upload now</string>
+    <string name="uploading">Uploading…</string>
+    <string name="upload_successful">Uploaded to Google Drive</string>
+    <string name="upload_failed">Upload failed: %1$s</string>
+    <string name="drive_auto_upload">Upload after every daily backup</string>
+    <string name="drive_auto_upload_desc">Each night, after the local backup, an encrypted copy is uploaded to Drive.</string>
+    <string name="drive_snapshots">Copies on Google Drive</string>
+    <string name="no_drive_snapshots">No copies on Drive yet</string>
+    <string name="refresh">Refresh</string>
+    <string name="restore_from_drive">Restore this copy</string>
+    <string name="downloading">Downloading…</string>
+    <string name="error_wrong_passphrase">Could not decrypt. Check the passphrase.</string>
+    <string name="drive_sign_in_failed">Google sign-in failed: %1$s</string>
+    <string name="drive_setup_hint">Sign-in needs this app to be registered in Google Cloud (an OAuth client for the app\'s signing key). See the README for the steps.</string>
+    <string name="drive_folder_hint">Files are stored in the folder \'Monito/backups\' of your Drive as *.monitoenc.</string>
+    <string name="passphrase_required">Set the encryption passphrase first.</string>
+    <string name="link_required">Link your Google account first.</string>
+    <plurals name="recurring_added_title">
+        <item quantity="one">%d recurring transaction added</item>
+        <item quantity="other">%d recurring transactions added</item>
+    </plurals>
+</resources>

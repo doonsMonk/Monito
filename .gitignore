@@ -1,0 +1,29 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/app/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+
+# IDE / tooling
+/.kotlin/
+/.vscode/
+
+# Never commit data: databases, backups, sample files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.monitobk
+*.monitoenc
+/samples/
+
+# Signing keys
+*.keystore
+*.jks
