@@ -159,3 +159,8 @@ Tables and columns added by this app (ignored by the old app): `budget(cat_id, a
 `template(name, amount, cat_id, comment, sort_order)` and `recurrence.recur_end`.
 
 Time period codes 1–6 match the original app; code 7 (one specific month, reached with the arrows) is new and lives only in this app's preferences.
+
+## License
+
+MIT, see [LICENSE](LICENSE). The original Monito Expense Manager is the work of Cygnipro Softwares; this
+repository contains a from-scratch rebuild and does not include any of their code or assets.
