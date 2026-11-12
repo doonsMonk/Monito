@@ -162,5 +162,9 @@ Time period codes 1–6 match the original app; code 7 (one specific month, reac
 
 ## License
 
-MIT, see [LICENSE](LICENSE). The original Monito Expense Manager is the work of Cygnipro Softwares; this
-repository contains a from-scratch rebuild and does not include any of their code or assets.
+MIT, see [LICENSE](LICENSE). One file, `InsecureSHA1PRNGKeyDerivator.java`, is taken from the Android Open
+Source Project and keeps its Apache License 2.0 header.
+
+The original Monito Expense Manager is the work of Cygnipro Softwares and is not affiliated with this
+project. This repository is a rewrite: no code or assets were copied from the original app, but its
+database schema, backup file format and colour palette are reproduced so that existing data keeps working.
