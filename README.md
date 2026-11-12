@@ -9,9 +9,11 @@ Built with Kotlin, Jetpack Compose (Material 3), plain SQLite, and WorkManager. 
 
 ## Download and install
 
-The latest build is in the [release](release/) folder of this repository:
+Get the latest build from the [Releases page](https://github.com/doonsMonk/Monito/releases/latest):
 
-- [Monito-9.0.apk](https://github.com/doonsMonk/Monito/raw/main/release/Monito-9.0.apk)
+- [Monito-9.0.apk](https://github.com/doonsMonk/Monito/releases/download/v9.0/Monito-9.0.apk)
+
+The same file is also kept in the [release](release/) folder of this repository.
 
 On the phone, download the file, open it, and allow installing from this source when Android asks.
 Later versions install over the existing app and keep its data. The build is signed with the
