@@ -2,6 +2,7 @@ package com.monito.expense.data
 
 import android.content.Context
 import android.net.Uri
+import com.monito.expense.drive.SyncCrypto
 import androidx.core.content.FileProvider
 import java.io.File
 import java.time.LocalDateTime
@@ -36,9 +37,22 @@ class BackupManager(private val context: Context, private val repo: Repository) 
     fun restore(file: File): Boolean = restoreBytes(file.readBytes())
 
     fun restoreFromUri(uri: Uri): Boolean {
-        val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return false
+        val bytes = readUri(uri) ?: return false
         return restoreBytes(bytes)
     }
+
+    /** Content of a picked file, or null when it cannot be opened. */
+    fun readUri(uri: Uri): ByteArray? = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+
+    /** True for a `.monitoenc` file: a Google Drive copy that needs the passphrase before it can be restored. */
+    fun needsPassphrase(bytes: ByteArray): Boolean = SyncCrypto.isEncrypted(bytes)
+
+    /**
+     * Restores a passphrase-encrypted Drive copy that was downloaded as a file.
+     * @throws SyncCrypto.WrongPassphraseException when the passphrase does not open it
+     */
+    fun restoreEncrypted(bytes: ByteArray, passphrase: CharArray): Boolean =
+        restoreBytes(SyncCrypto.decrypt(bytes, passphrase))
 
     /** Accepts `.monitobk` or a raw `MonitoDB.sqlite`; replaces the live database and upgrades it if needed. */
     fun restoreBytes(bytes: ByteArray): Boolean {

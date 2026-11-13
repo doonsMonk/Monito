@@ -368,4 +368,5 @@
     <string name="download">Download</string>
     <string name="later">Later</string>
     <string name="save_transaction">Save transaction</string>
+    <string name="encrypted_backup_desc">This file is an encrypted Google Drive copy (.monitoenc). Enter the passphrase that was set on the Google Drive screen when it was uploaded.</string>
 </resources>

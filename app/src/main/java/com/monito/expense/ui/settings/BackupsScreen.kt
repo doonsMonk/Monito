@@ -18,7 +18,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Backup
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.monito.expense.drive.SyncCrypto
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -87,6 +92,7 @@ fun BackupsScreen(nav: NavController, firstRun: Boolean = false) {
     var confirmRestore by remember { mutableStateOf<BackupFile?>(null) }
     var confirmDelete by remember { mutableStateOf<BackupFile?>(null) }
     var pendingImport by remember { mutableStateOf<android.net.Uri?>(null) }
+    var pendingEncrypted by remember { mutableStateOf<ByteArray?>(null) }
     var exporting by remember { mutableStateOf<BackupFile?>(null) }
 
     LaunchedEffect(reload) { list = withContext(Dispatchers.IO) { manager.list() } }
@@ -255,11 +261,70 @@ fun BackupsScreen(nav: NavController, firstRun: Boolean = false) {
             confirmLabel = stringResource(R.string.restore),
             onConfirm = {
                 scope.launch {
-                    val ok = withContext(Dispatchers.IO) { runCatching { manager.restoreFromUri(uri) }.getOrDefault(false) }
-                    finishRestore(ok)
+                    val bytes = withContext(Dispatchers.IO) { runCatching { manager.readUri(uri) }.getOrNull() }
+                    if (bytes != null && manager.needsPassphrase(bytes)) {
+                        // A downloaded Google Drive copy: ask for the passphrase it was encrypted with.
+                        pendingEncrypted = bytes
+                    } else {
+                        val ok = bytes != null && withContext(Dispatchers.IO) { runCatching { manager.restoreBytes(bytes) }.getOrDefault(false) }
+                        finishRestore(ok)
+                    }
                 }
             },
             onDismiss = { pendingImport = null },
+        )
+    }
+    pendingEncrypted?.let { bytes ->
+        var passphrase by remember { mutableStateOf("") }
+        var wrong by remember { mutableStateOf(false) }
+        var busy by remember { mutableStateOf(false) }
+        AlertDialog(
+            onDismissRequest = { if (!busy) pendingEncrypted = null },
+            title = { Text(stringResource(R.string.drive_passphrase)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.encrypted_backup_desc))
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = passphrase,
+                        onValueChange = { passphrase = it; wrong = false },
+                        label = { Text(stringResource(R.string.drive_passphrase)) },
+                        singleLine = true,
+                        isError = wrong,
+                        supportingText = if (wrong) ({ Text(stringResource(R.string.error_wrong_passphrase)) }) else null,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !busy && passphrase.isNotEmpty(),
+                    onClick = {
+                        busy = true
+                        scope.launch {
+                            // null = wrong passphrase, otherwise whether the restore itself worked
+                            val result: Boolean? = withContext(Dispatchers.IO) {
+                                try {
+                                    manager.restoreEncrypted(bytes, passphrase.toCharArray())
+                                } catch (e: SyncCrypto.WrongPassphraseException) {
+                                    null
+                                } catch (e: Exception) {
+                                    false
+                                }
+                            }
+                            busy = false
+                            if (result == null) {
+                                wrong = true
+                            } else {
+                                pendingEncrypted = null
+                                finishRestore(result)
+                            }
+                        }
+                    },
+                ) { Text(stringResource(R.string.restore)) }
+            },
+            dismissButton = { TextButton(enabled = !busy, onClick = { pendingEncrypted = null }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 }

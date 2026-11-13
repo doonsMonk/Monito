@@ -11,7 +11,7 @@ Built with Kotlin, Jetpack Compose (Material 3), plain SQLite, and WorkManager. 
 
 Get the latest build from the [Releases page](https://github.com/doonsMonk/Monito/releases/latest):
 
-- [Monito-9.1.apk](https://github.com/doonsMonk/Monito/releases/download/v9.1/Monito-9.1.apk)
+- [Monito-9.2.apk](https://github.com/doonsMonk/Monito/releases/download/v9.2/Monito-9.2.apk)
 
 The same file is also kept in the [release](release/) folder of this repository.
 
@@ -33,6 +33,7 @@ backups* (or the *Existing user?* card on first launch) accepts all of them:
 |---|---|
 | Manual or automatic backup from old Monito | Phone storage → `Monito/backups/*.monitobk` |
 | Google Drive sync of old Monito | Google Drive → `Monito/backups/*.monitobk` (download it to the phone first) |
+| Encrypted Drive copy of this app | Google Drive → `Monito/backups/*.monitoenc`, downloaded to the phone; asks for the passphrase |
 | Raw database (rooted phone / `adb`) | `/data/data/com.monito/databases/MonitoDB.sqlite` |
 
 The `.monitobk` files are the SQLite database encrypted with AES (fixed key, derived the way the old app
