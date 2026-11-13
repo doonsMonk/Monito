@@ -1,6 +1,6 @@
 # Privacy Policy — Monito
 
-_Last updated: 11 November 2026_
+_Last updated: 12 November 2026_
 
 Monito is a personal expense manager for Android. It is designed so that your data stays with you.
 
@@ -12,7 +12,7 @@ Monito is a personal expense manager for Android. It is designed so that your da
 - Local backups you create (manually or with the daily automatic backup) are written to the app's
   folder on your device storage (`Android/data/com.monito.expense/files/backups`).
 - The developer does not run any server. The app does not send your data anywhere unless you link
-  Google Drive (below). There are no ads, no analytics and no tracking.
+  Google Drive or tap "Check for updates" (both below). There are no ads, no analytics and no tracking.
 
 ## Google Drive (optional)
 
@@ -39,12 +39,14 @@ If you choose to link Google Drive:
   automatically.
 - **Biometrics / screen lock**: only if you enable the app lock; the check is done by Android, the
   app never sees your fingerprint or PIN.
-- **Internet**: used only for Google Drive when linked.
+- **Internet**: used for Google Drive when linked, and when you tap "Check for updates" in Settings.
+  That check reads the public list of releases from GitHub; it sends nothing about you or your data,
+  though GitHub, like any website, sees the request's IP address. The app never checks by itself.
 
 ## Data sharing
 
 The developer does not collect, receive, sell or share any personal data. The only third party that
-receives data is Google, and only when you link Google Drive, as described above.
+receives your data is Google, and only when you link Google Drive, as described above.
 
 ## Children
 

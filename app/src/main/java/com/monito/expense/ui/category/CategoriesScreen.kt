@@ -39,7 +39,13 @@ import androidx.navigation.NavController
 import com.monito.expense.R
 import com.monito.expense.data.CatType
 import com.monito.expense.data.Category
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import com.monito.expense.ui.CategoryAvatar
+import com.monito.expense.ui.ConfirmDialog
+import com.monito.expense.ui.toast
+import kotlinx.coroutines.launch
 import com.monito.expense.ui.EmptyState
 import com.monito.expense.ui.Routes
 import com.monito.expense.ui.amountColor
@@ -54,6 +60,22 @@ fun CategoriesScreen(nav: NavController) {
     val changes by repo.changes.collectAsState()
     var categories by remember { mutableStateOf<List<Category>?>(null) }
     LaunchedEffect(changes) { categories = withContext(Dispatchers.IO) { repo.categories() } }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var showRecolor by remember { mutableStateOf(false) }
+    if (showRecolor) {
+        ConfirmDialog(
+            title = stringResource(R.string.assign_different_colors),
+            text = stringResource(R.string.assign_different_colors_desc),
+            onConfirm = {
+                scope.launch {
+                    val n = withContext(Dispatchers.IO) { repo.assignDistinctColors() }
+                    toast(context, context.getString(R.string.colors_updated, n))
+                }
+            },
+            onDismiss = { showRecolor = false },
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -61,6 +83,9 @@ fun CategoriesScreen(nav: NavController) {
                 title = { Text(stringResource(R.string.categories)) },
                 navigationIcon = {
                     IconButton(onClick = { nav.popBackStack() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) }
+                },
+                actions = {
+                    IconButton(onClick = { showRecolor = true }) { Icon(Icons.Default.Palette, contentDescription = stringResource(R.string.assign_different_colors)) }
                 },
             )
         },

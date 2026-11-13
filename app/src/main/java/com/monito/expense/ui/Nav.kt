@@ -18,6 +18,8 @@ import com.monito.expense.ui.budget.BudgetsScreen
 import com.monito.expense.ui.category.AddCategoryScreen
 import com.monito.expense.ui.category.CategoriesScreen
 import com.monito.expense.ui.main.CategoryRecordsScreen
+import androidx.compose.ui.window.DialogProperties
+import androidx.navigation.compose.dialog
 import com.monito.expense.ui.main.MainScreen
 import com.monito.expense.ui.main.SearchScreen
 import com.monito.expense.ui.record.AddRecordScreen
@@ -73,8 +75,9 @@ fun MonitoNavHost(pendingAddTransaction: MutableState<Boolean>) {
     NavHost(navController = nav, startDestination = start) {
         composable(Routes.FIRST_RUN) { FirstRunScreen(nav) }
         composable(Routes.MAIN) { MainScreen(nav) }
-        composable(
+        dialog(
             Routes.RECORD,
+            dialogProperties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = false),
             arguments = listOf(
                 navArgument("id") { type = NavType.IntType; defaultValue = -1 },
                 navArgument("date") { type = NavType.StringType; defaultValue = "" },

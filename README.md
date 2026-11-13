@@ -11,14 +11,18 @@ Built with Kotlin, Jetpack Compose (Material 3), plain SQLite, and WorkManager. 
 
 Get the latest build from the [Releases page](https://github.com/doonsMonk/Monito/releases/latest):
 
-- [Monito-9.0.apk](https://github.com/doonsMonk/Monito/releases/download/v9.0/Monito-9.0.apk)
+- [Monito-9.1.apk](https://github.com/doonsMonk/Monito/releases/download/v9.1/Monito-9.1.apk)
 
 The same file is also kept in the [release](release/) folder of this repository.
 
 On the phone, download the file, open it, and allow installing from this source when Android asks.
-Later versions install over the existing app and keep its data. The build is signed with the
-development key of the machine that produced it, which is fine for personal use; a store release
-would need its own keystore.
+Later versions install over the existing app and keep its data: open the new APK and choose
+**Update**, never uninstall first. *Settings → Check for updates* compares the installed version with
+the latest release here and offers the download.
+
+From version 9.1 on, builds are signed with a dedicated release key. Version 9.0 was signed with a
+development key, so going from 9.0 to 9.1 is the one exception: make a backup in the app, uninstall
+9.0, install 9.1 and restore the backup.
 
 ## Moving your data from the old app
 
@@ -76,8 +80,13 @@ app while you migrate.
   notes, on top of the text search.
 - **Quick templates** (drawer → Quick templates, or the bookmark icon on the add screen): one-tap
   presets that prefill amount, category and note.
-- **Swipe and long press** on a transaction: swipe left to move it to Trash (with Undo), long press for
-  Edit / Duplicate / Delete.
+- **Long press** on a transaction for Edit / Duplicate / Delete (with Undo). There is no swipe to
+  delete: it fired by accident while scrolling.
+- **Add transaction in three steps**, as in the original: calculator for the amount, category picker
+  (with "Add category" and a colour choice), then a details page. Tapping the amount or category
+  there reopens that step. Tapping a day header on the home screen adds a transaction for that day.
+- **Category colours**: a new category starts with the least used palette colour, and
+  Categories → palette icon gives every category a different colour.
 - **Smarter recurrings**: optional end date, "skip next", a preview of the next five dates and a
   notification when recurring transactions are added automatically.
 - **Tablet layout**: on screens 720 dp and wider, transactions and graphs sit side by side.
@@ -101,10 +110,11 @@ as the one you enter data on, and restore its latest copy on the other.
 2. Under *APIs & Services → OAuth consent screen* create an *External* consent screen, add yourself
    as a test user, and add the scopes `.../auth/drive.file` and `email`.
 3. Under *APIs & Services → Credentials → Create credentials → OAuth client ID* choose **Android**,
-   package name `com.monito.expense`, and the SHA-1 of the signing key. For the debug build on this PC
-   that is `BA:08:6B:C8:1A:14:E3:A3:FE:72:56:5F:BE:C3:4D:65:6D:C3:C8:56`
-   (`keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore -alias androiddebugkey -storepass android`).
-   A release build signed with another key needs its own client with that key's SHA-1.
+   package name `com.monito.expense`, and the SHA-1 of the signing key. The published builds (9.1 and
+   later) are signed with the release key, SHA-1
+   `AF:FB:2E:6D:9C:FB:78:47:BC:1D:82:9C:23:41:62:BC:82:12:40:01`. A build signed with another key
+   (for example a debug build) needs its own client with that key's SHA-1; several Android clients
+   can exist in the same project.
 4. No client ID has to be pasted into the app; Google Play services finds the client by package name
    and signature. Then tap "Link Google Drive" in the app.
 
@@ -126,7 +136,14 @@ $env:JAVA_HOME = "C:\Program Files\Android\openjdk\jdk-21.0.8"
 .\gradlew.bat testDebugUnitTest      # unit tests incl. Robolectric database tests
 ```
 
-Install the debug APK with `adb install app\build\outputs\apk\debug\app-debug.apk` or copy it to the phone.
+Install the debug APK with `adb install app/build/outputs/apk/debug/app-debug.apk` or copy it to the phone.
+
+### Release signing
+
+`.\gradlew.bat assembleRelease` signs with the key described in `keystore.properties` in the project
+root (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`). That file and the keystore are not in
+the repository. Without the file the release build falls back to the debug key, and such a build
+cannot be installed over a published one.
 
 ## Project layout
 

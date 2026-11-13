@@ -29,3 +29,6 @@
 # Signing keys
 *.keystore
 *.jks
+
+# Release signing: path and passwords of the keystore
+/keystore.properties

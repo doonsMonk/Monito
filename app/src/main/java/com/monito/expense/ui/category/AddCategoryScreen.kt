@@ -83,6 +83,7 @@ fun AddCategoryScreen(nav: NavController, categoryId: Int) {
 
     LaunchedEffect(categoryId) {
         val result = withContext(Dispatchers.IO) { repo.colors() to (if (editing) repo.category(categoryId) else null) }
+        val leastUsed = withContext(Dispatchers.IO) { repo.leastUsedColorId() }
         colors = result.first
         result.second?.let { c ->
             existing = c
@@ -91,7 +92,7 @@ fun AddCategoryScreen(nav: NavController, categoryId: Int) {
             colorId = c.colorId
             favorite = c.isFavorite
         }
-        if (!editing && colors.isNotEmpty()) colorId = colors.getOrNull((0..colors.size - 1).random())?.id ?: colorId
+        if (!editing) colorId = leastUsed ?: colors.firstOrNull()?.id ?: colorId
         loaded = true
     }
 

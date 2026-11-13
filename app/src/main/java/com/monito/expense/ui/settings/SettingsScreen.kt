@@ -1,6 +1,9 @@
 package com.monito.expense.ui.settings
 
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import com.monito.expense.data.UpdateChecker
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -141,6 +144,10 @@ fun SettingsScreen(nav: NavController) {
     var showTheme by remember { mutableStateOf(false) }
     var showTime by remember { mutableStateOf(false) }
     var showBackupNow by remember { mutableStateOf(false) }
+    var checkingUpdate by remember { mutableStateOf(false) }
+    var showUpdate by remember { mutableStateOf(false) }
+    var updateResult by remember { mutableStateOf<UpdateChecker.Release?>(null) }
+    val installedVersion = remember { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() ?: "" }
 
     val notifPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) {
@@ -256,8 +263,65 @@ fun SettingsScreen(nav: NavController) {
             SwitchRow(stringResource(R.string.hide_content), stringResource(R.string.this_will_also_prevent_screenshots), settings.hideContent) { on ->
                 prefs.update { it.copy(hideContent = on) }
             }
+            HorizontalDivider()
+
+            SectionTitle(stringResource(R.string.updates))
+            SettingRow(
+                stringResource(R.string.check_for_updates),
+                if (checkingUpdate) stringResource(R.string.checking) else stringResource(R.string.installed_version, installedVersion),
+                onClick = {
+                    if (!checkingUpdate) {
+                        checkingUpdate = true
+                        scope.launch {
+                            val latest = withContext(Dispatchers.IO) { UpdateChecker.fetchLatest() }
+                            checkingUpdate = false
+                            updateResult = latest
+                            showUpdate = true
+                        }
+                    }
+                },
+            )
             Spacer(Modifier.height(24.dp))
         }
+    }
+
+    if (showUpdate) {
+        val latest = updateResult
+        val newer = latest != null && UpdateChecker.isNewer(latest.version, installedVersion)
+        AlertDialog(
+            onDismissRequest = { showUpdate = false },
+            title = {
+                Text(
+                    when {
+                        latest == null -> stringResource(R.string.update_check_failed)
+                        newer -> stringResource(R.string.update_available, latest.version)
+                        else -> stringResource(R.string.up_to_date)
+                    },
+                )
+            },
+            text = {
+                Text(
+                    when {
+                        latest == null -> stringResource(R.string.update_check_failed_desc)
+                        newer -> stringResource(R.string.update_available_desc, installedVersion, latest.version)
+                        else -> stringResource(R.string.up_to_date_desc, installedVersion)
+                    },
+                )
+            },
+            confirmButton = {
+                if (latest != null && newer) {
+                    TextButton(onClick = {
+                        showUpdate = false
+                        runCatching {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(latest.apkUrl ?: latest.pageUrl)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                        }.onFailure { toast(context, R.string.update_check_failed) }
+                    }) { Text(stringResource(R.string.download)) }
+                } else {
+                    TextButton(onClick = { showUpdate = false }) { Text(stringResource(R.string.okay)) }
+                }
+            },
+            dismissButton = if (latest != null && newer) ({ TextButton(onClick = { showUpdate = false }) { Text(stringResource(R.string.later)) } }) else null,
+        )
     }
 
     if (showCurrency) {

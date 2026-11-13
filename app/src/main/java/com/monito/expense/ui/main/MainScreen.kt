@@ -2,7 +2,16 @@ package com.monito.expense.ui.main
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,7 +35,10 @@ import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Balance
+import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Label
@@ -45,7 +57,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -143,6 +155,12 @@ fun periodLabel(settings: Settings, range: DateRange?): String = when (settings.
     TimePeriod.MONTH -> (settings.monthAnchor ?: YearMonth.now()).title()
     TimePeriod.CUSTOM -> range?.let { "${it.from.short()} – ${it.to.short()}" } ?: stringResource(R.string.custom)
 }
+
+/** Period name for the home screen: "this month" and "last month" are shown as the month itself, like the original app. */
+@Composable
+fun homePeriodLabel(settings: Settings, range: DateRange?): String =
+    if (range != null && (settings.timePeriod == TimePeriod.THIS_MONTH || settings.timePeriod == TimePeriod.LAST_MONTH)) YearMonth.from(range.from).title()
+    else periodLabel(settings, range)
 
 /** Second line under the period name: the calendar month for monthly periods, otherwise the exact dates. */
 @Composable
@@ -348,9 +366,12 @@ fun MainScreen(nav: NavController) {
                     Column {
                         TopAppBar(
                             title = {
-                                Column {
-                                    Text(stringResource(R.string.app_name), maxLines = 1)
-                                    Text(periodLabel(settings, range), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Row(
+                                    modifier = Modifier.clickable { showPeriod = true },
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(homePeriodLabel(settings, range), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                                    Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.change_time_period))
                                 }
                             },
                             navigationIcon = {
@@ -359,7 +380,6 @@ fun MainScreen(nav: NavController) {
                                 }
                             },
                             actions = {
-                                IconButton(onClick = { showPeriod = true }) { Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.change_time_period)) }
                                 IconButton(onClick = { nav.navigate(Routes.SEARCH) }) { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search)) }
                                 IconButton(onClick = { menuOpen = true }) { Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more)) }
                                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
@@ -381,13 +401,6 @@ fun MainScreen(nav: NavController) {
                                 }
                             },
                         )
-                        PeriodNavigator(
-                            settings = settings,
-                            range = range,
-                            onPrevious = { stepPeriod(-1) },
-                            onNext = { stepPeriod(+1) },
-                            onOpen = { showPeriod = true },
-                        )
                     }
                 },
                 bottomBar = {
@@ -408,13 +421,27 @@ fun MainScreen(nav: NavController) {
                 },
                 floatingActionButton = {
                     if (tab == 0 || twoPane) {
-                        FloatingActionButton(onClick = { nav.navigate(Routes.record()) }) {
-                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_transaction))
-                        }
+                        ExtendedFloatingActionButton(
+                            onClick = { nav.navigate(Routes.record()) },
+                            icon = { Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                            text = { Text(stringResource(R.string.add_transaction)) },
+                            shape = RoundedCornerShape(50),
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        )
                     }
                 },
             ) { padding ->
                 val r = range
+                val periodBar: @Composable () -> Unit = {
+                    PeriodNavigator(
+                        settings = settings,
+                        range = range,
+                        onPrevious = { stepPeriod(-1) },
+                        onNext = { stepPeriod(+1) },
+                        onOpen = { showPeriod = true },
+                    )
+                }
                 if (r != null) {
                     if (twoPane) {
                         Row(Modifier.padding(padding)) {
@@ -427,6 +454,8 @@ fun MainScreen(nav: NavController) {
                                 onOpen = { nav.navigate(Routes.record(it.id)) },
                                 onDelete = { deleteWithUndo(it) },
                                 onDuplicate = { duplicate(it) },
+                                onDateClick = { nav.navigate(Routes.record(date = it.toString())) },
+                                periodBar = periodBar,
                             )
                             VerticalDivider()
                             GraphsTab(
@@ -448,6 +477,8 @@ fun MainScreen(nav: NavController) {
                             onOpen = { nav.navigate(Routes.record(it.id)) },
                             onDelete = { deleteWithUndo(it) },
                             onDuplicate = { duplicate(it) },
+                            onDateClick = { nav.navigate(Routes.record(date = it.toString())) },
+                            periodBar = periodBar,
                         )
                     } else {
                         GraphsTab(
@@ -456,6 +487,7 @@ fun MainScreen(nav: NavController) {
                             repo = repo,
                             changes = changes,
                             modifier = Modifier.padding(padding),
+                            periodBar = periodBar,
                             onCategory = { nav.navigate(Routes.categoryRecords(it.catId)) },
                         )
                     }
@@ -522,7 +554,7 @@ fun MainScreen(nav: NavController) {
 
 // --------------------------------------------------------------------------- period navigator
 
-/** ◀ period ▶ bar under the app bar. Tapping the middle opens the full period dialog. */
+/** ◀ (period) ▶ line: the arrows walk month by month, tapping the label opens the full period dialog. */
 @Composable
 fun PeriodNavigator(
     settings: Settings,
@@ -532,32 +564,32 @@ fun PeriodNavigator(
     onOpen: () -> Unit,
 ) {
     val canStep = TimePeriods.canStep(settings.timePeriod)
-    Surface(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f), tonalElevation = 0.dp) {
-        Row(
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        IconButton(onClick = onPrevious, enabled = canStep) {
+            Icon(Icons.Default.ChevronLeft, contentDescription = stringResource(R.string.previous_month))
+        }
+        Text(
+            homePeriodLabel(settings, range),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 2.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(onClick = onPrevious, enabled = canStep) {
-                Icon(Icons.Default.ChevronLeft, contentDescription = stringResource(R.string.previous_month))
-            }
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable(onClick = onOpen)
-                    .padding(vertical = 6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(periodLabel(settings, range), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
-                val detail = periodDetail(settings, range)
-                if (detail.isNotEmpty()) {
-                    Text(detail, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-                }
-            }
-            IconButton(onClick = onNext, enabled = canStep) {
-                Icon(Icons.Default.ChevronRight, contentDescription = stringResource(R.string.next_month))
-            }
+                .weight(1f, fill = false)
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+                .clickable(onClick = onOpen)
+                .padding(horizontal = 16.dp, vertical = 5.dp),
+        )
+        IconButton(onClick = onNext, enabled = canStep) {
+            Icon(Icons.Default.ChevronRight, contentDescription = stringResource(R.string.next_month))
         }
     }
 }
@@ -573,6 +605,46 @@ private data class Totals(
     val balanceWithCf: BigDecimal get() = balance + carryForward
 }
 
+/** One figure of the totals strip: a small label with the value underneath. */
+@Composable
+private fun TotalCell(label: String, value: String, color: Color, icon: androidx.compose.ui.graphics.vector.ImageVector? = null) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (icon != null) {
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                Spacer(Modifier.width(3.dp))
+            }
+            Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+        }
+        Text(value, fontSize = 18.sp, color = color, maxLines = 1)
+    }
+}
+
+/** Expense / Income / Balance (and carry forward) side by side under the app bar; scrolls sideways when it does not fit. */
+@Composable
+private fun TotalsStrip(totals: Totals, settings: Settings) {
+    val currency = settings.currency
+    val plain = MaterialTheme.colorScheme.onSurface
+    val negative = amountColor(CatType.EXPENSE)
+    Surface(color = MaterialTheme.colorScheme.surface, tonalElevation = 2.dp) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 4.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            TotalCell(stringResource(R.string.expense), AmountFormatter.format(totals.expense, currency), plain, Icons.Default.RemoveCircleOutline)
+            TotalCell(stringResource(R.string.income), AmountFormatter.format(totals.income, currency), plain, Icons.Default.AddCircleOutline)
+            TotalCell(stringResource(R.string.balance), AmountFormatter.format(totals.balance, currency), if (totals.balance.signum() < 0) negative else plain, Icons.Default.Balance)
+            if (settings.showCarryForward) {
+                TotalCell(stringResource(R.string.carry_forward), AmountFormatter.format(totals.carryForward, currency), if (totals.carryForward.signum() < 0) negative else plain)
+                TotalCell(stringResource(R.string.balance_with_cf), AmountFormatter.format(totals.balanceWithCf, currency), if (totals.balanceWithCf.signum() < 0) negative else plain)
+            }
+        }
+    }
+}
+
 @Composable
 fun TransactionsTab(
     range: DateRange,
@@ -583,6 +655,8 @@ fun TransactionsTab(
     onOpen: (Transaction) -> Unit,
     onDelete: ((Transaction) -> Unit)? = null,
     onDuplicate: ((Transaction) -> Unit)? = null,
+    onDateClick: ((LocalDate) -> Unit)? = null,
+    periodBar: (@Composable () -> Unit)? = null,
 ) {
     var transactions by remember { mutableStateOf<List<Transaction>?>(null) }
     var totals by remember { mutableStateOf(Totals()) }
@@ -606,30 +680,26 @@ fun TransactionsTab(
     }
     val currency = settings.currency
     val list = transactions
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        item(key = "summary") {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            ) {
-                Column(Modifier.padding(16.dp)) {
-                    SummaryRow(stringResource(R.string.total_income), AmountFormatter.format(totals.income, currency), amountColor(CatType.INCOME))
-                    SummaryRow(stringResource(R.string.total_expense), AmountFormatter.format(totals.expense, currency), amountColor(CatType.EXPENSE))
-                    HorizontalDivider(Modifier.padding(vertical = 6.dp))
-                    SummaryRow(stringResource(R.string.balance), AmountFormatter.format(totals.balance, currency), bold = true)
-                    if (settings.showCarryForward) {
-                        SummaryRow(stringResource(R.string.carry_forward), AmountFormatter.format(totals.carryForward, currency))
-                        SummaryRow(stringResource(R.string.balance_with_cf), AmountFormatter.format(totals.balanceWithCf, currency), bold = true)
-                    }
-                }
+    // The period bar already names a single month, so month labels are only needed for longer ranges.
+    val severalMonths = YearMonth.from(range.from) != YearMonth.from(range.to)
+    Column(modifier = modifier.fillMaxSize()) {
+        TotalsStrip(totals, settings)
+        periodBar?.invoke()
+        LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            if (list != null && list.isEmpty()) {
+                item(key = "empty") { EmptyState(stringResource(R.string.no_transactions), stringResource(R.string.msg_no_trans)) }
+            } else if (list != null) {
+                transactionItems(
+                    list,
+                    currency,
+                    showMonthLabels = severalMonths,
+                    onClick = onOpen,
+                    onDelete = onDelete,
+                    onDuplicate = onDuplicate,
+                    onDateClick = onDateClick,
+                )
+                item(key = "bottom-space") { Spacer(Modifier.height(88.dp)) }
             }
-        }
-        if (list != null && list.isEmpty()) {
-            item(key = "empty") { EmptyState(stringResource(R.string.no_transactions), stringResource(R.string.msg_no_trans)) }
-        } else if (list != null) {
-            transactionItems(list, currency, onClick = onOpen, onDelete = onDelete, onDuplicate = onDuplicate)
-            item(key = "bottom-space") { Spacer(Modifier.height(88.dp)) }
         }
     }
 }
@@ -643,6 +713,7 @@ fun GraphsTab(
     repo: Repository,
     changes: Long,
     modifier: Modifier = Modifier,
+    periodBar: (@Composable () -> Unit)? = null,
     onCategory: (CategoryTotal) -> Unit,
 ) {
     var typeIndex by rememberSaveable { mutableIntStateOf(0) }
@@ -654,6 +725,7 @@ fun GraphsTab(
     }
     val currency = settings.currency
     Column(modifier = modifier.fillMaxSize()) {
+        periodBar?.invoke()
         TabRow(selectedTabIndex = typeIndex) {
             Tab(selected = typeIndex == 0, onClick = { typeIndex = 0 }, text = { Text(stringResource(R.string.expense)) })
             Tab(selected = typeIndex == 1, onClick = { typeIndex = 1 }, text = { Text(stringResource(R.string.income)) })

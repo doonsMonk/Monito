@@ -85,6 +85,38 @@ class Repository private constructor(context: Context) {
             ColorItem(it.getInt(0), it.getString(1), it.getInt(2))
         }
 
+    /** The palette colour used by the fewest categories, so a new category stands apart from the others. */
+    fun leastUsedColorId(): Int? {
+        val used = db.list("select cat_color_id, count(*) from category group by cat_color_id") { it.getInt(0) to it.getInt(1) }.toMap()
+        return colors().minByOrNull { used[it.id] ?: 0 }?.id
+    }
+
+    /**
+     * Spreads the palette over the categories: the first category of each colour keeps it, every
+     * other one moves to the colour used least so far. Returns how many categories changed.
+     */
+    fun assignDistinctColors(): Int {
+        val palette = colors().map { it.id }
+        if (palette.isEmpty()) return 0
+        val usage = palette.associateWith { 0 }.toMutableMap()
+        val moved = ArrayList<Pair<Int, Int>>()
+        val pending = ArrayList<Category>()
+        for (c in categories(includeSpecial = true).sortedBy { it.id }) {
+            if (c.colorId in usage && usage[c.colorId] == 0) usage[c.colorId] = 1 else pending.add(c)
+        }
+        for (c in pending) {
+            val target = palette.minByOrNull { usage[it] ?: 0 } ?: continue
+            usage[target] = (usage[target] ?: 0) + 1
+            if (target != c.colorId) moved.add(c.id to target)
+        }
+        if (moved.isEmpty()) return 0
+        db.transaction {
+            for ((catId, colorId) in moved) execSQL("update category set cat_color_id=? where cat_id=?", arrayOf<Any?>(colorId, catId))
+        }
+        notifyChanged()
+        return moved.size
+    }
+
     // ------------------------------------------------------------------ transactions
 
     fun transactions(from: LocalDate, to: LocalDate): List<Transaction> =

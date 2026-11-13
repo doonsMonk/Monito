@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,22 +33,18 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +56,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.RemoveCircleOutline
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.window.DialogProperties
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.monito.expense.R
 import com.monito.expense.data.AmountFormatter
 import com.monito.expense.data.BackupManager
@@ -244,17 +249,42 @@ fun MonitoTimePickerDialog(initial: LocalTime, onDismiss: () -> Unit, onPick: (L
     )
 }
 
-/** Category chooser: favourites first, then the rest alphabetically, like the original app's picker. */
+/**
+ * Category chooser: favourites first, then the rest alphabetically, like the original app's picker.
+ * The list is kept fresh from the database, and "Add category" creates one in place and picks it.
+ */
 @Composable
 fun CategoryPickerDialog(
     categories: List<Category>,
     onDismiss: () -> Unit,
     allowNone: Boolean = false,
+    allowAdd: Boolean = true,
+    dismissAfterPick: Boolean = true,
+    dismissOnOutside: Boolean = true,
     onPick: (Category?) -> Unit,
 ) {
-    val ordered = remember(categories) { categories.sortedWith(compareByDescending<Category> { it.isFavorite }.thenBy { it.name.lowercase() }) }
+    val repo = rememberRepository()
+    val changes by repo.changes.collectAsState()
+    var current by remember { mutableStateOf(categories) }
+    var showAdd by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(changes) { current = withContext(Dispatchers.IO) { repo.categories() } }
+    val ordered = remember(current) { current.sortedWith(compareByDescending<Category> { it.isFavorite }.thenBy { it.name.lowercase() }) }
+
+    fun pick(c: Category?) {
+        onPick(c)
+        if (dismissAfterPick) onDismiss()
+    }
+
+    if (showAdd) {
+        AddCategoryDialog(onDismiss = { showAdd = false }) { created ->
+            showAdd = false
+            pick(created)
+        }
+        return
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
+        properties = DialogProperties(dismissOnClickOutside = dismissOnOutside),
         title = { Text(stringResource(R.string.select_category)) },
         text = {
             if (ordered.isEmpty()) {
@@ -267,7 +297,7 @@ fun CategoryPickerDialog(
                                 stringResource(R.string.none),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { onPick(null); onDismiss() }
+                                    .clickable { pick(null) }
                                     .padding(vertical = 12.dp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -277,31 +307,50 @@ fun CategoryPickerDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onPick(c); onDismiss() }
-                                .padding(vertical = 10.dp),
+                                .clickable { pick(c) }
+                                .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            CategoryAvatar(c.colorCode, c.colorTextType, c.name, 36.dp)
-                            Spacer(Modifier.width(12.dp))
-                            Column(Modifier.weight(1f)) {
-                                Text(c.name, style = MaterialTheme.typography.bodyLarge)
-                                Text(
-                                    stringResource(if (c.type == CatType.EXPENSE) R.string.expense else R.string.income),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = amountColor(c.type),
-                                )
-                            }
+                            CategoryTypeBadge(c.colorCode, c.colorTextType, c.type, 36.dp)
+                            Spacer(Modifier.width(14.dp))
+                            Text(c.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                             if (c.isFavorite) Icon(Icons.Default.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
             }
         },
-        confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        confirmButton = {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                if (allowAdd) {
+                    TextButton(onClick = { showAdd = true }) { Text(stringResource(R.string.add_category).uppercase(), fontWeight = FontWeight.Bold) }
+                }
+                Spacer(Modifier.weight(1f))
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel).uppercase(), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            }
+        },
     )
 }
 
+/** Round badge in the category colour with a minus (expense) or plus (income) sign, as in the original app. */
+@Composable
+fun CategoryTypeBadge(colorCode: String?, textType: Int, type: CatType, size: Dp = 36.dp) {
+    Box(
+        modifier = Modifier
+            .size(size)
+            .background(categoryColor(colorCode), CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            if (type == CatType.EXPENSE) Icons.Default.RemoveCircleOutline else Icons.Default.AddCircleOutline,
+            contentDescription = stringResource(if (type == CatType.EXPENSE) R.string.expense else R.string.income),
+            tint = categoryTextColor(textType),
+            modifier = Modifier.size(size * 0.6f),
+        )
+    }
+}
+
+/** One transaction as a rounded bar filled with its category colour, like the original list. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TransactionRow(
@@ -310,50 +359,62 @@ fun TransactionRow(
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
 ) {
+    val fg = categoryTextColor(t.colorTextType)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 12.dp, vertical = 3.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(categoryColor(t.colorCode))
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .heightIn(min = 44.dp)
+            .padding(start = 12.dp, end = 16.dp, top = 7.dp, bottom = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CategoryAvatar(t.colorCode, t.colorTextType, t.catName)
+        Icon(
+            if (t.catType == CatType.EXPENSE) Icons.Default.RemoveCircleOutline else Icons.Default.AddCircleOutline,
+            contentDescription = stringResource(if (t.catType == CatType.EXPENSE) R.string.expense else R.string.income),
+            tint = fg,
+            modifier = Modifier.size(18.dp),
+        )
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(t.catName, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            val subtitle = buildString {
-                if (t.note.isNotBlank()) append(t.note)
-                if (t.isAutoAdded) {
-                    if (isNotEmpty()) append(" • ")
-                    append(stringResource(R.string.auto_added_by_recurring))
-                }
-            }
-            if (subtitle.isNotEmpty()) {
+            Text(t.catName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = fg, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (t.note.isNotBlank()) {
                 Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    t.note,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = fg.copy(alpha = 0.85f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
         }
         if (t.imgPath != null) {
-            Icon(Icons.Default.Image, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
+            Icon(Icons.Default.Image, contentDescription = null, tint = fg, modifier = Modifier.size(16.dp))
         }
         if (t.isAutoAdded) {
-            Icon(Icons.Default.Repeat, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
+            Icon(Icons.Default.Repeat, contentDescription = stringResource(R.string.auto_added_by_recurring), tint = fg, modifier = Modifier.size(16.dp))
         }
-        AmountText(t.amount, t.catType, currency)
+        Spacer(Modifier.width(8.dp))
+        Text(
+            AmountFormatter.format(t.amount, currency),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = fg,
+            maxLines = 1,
+        )
     }
 }
 
-/** A row that can be swiped left to delete and long pressed for Edit / Duplicate / Delete. */
+/**
+ * A transaction row whose long press offers Edit / Duplicate / Delete. There is deliberately no
+ * swipe gesture: swiping to delete fired by accident while scrolling the list.
+ */
 @Composable
-fun SwipeableTransactionRow(
+fun TransactionRowWithMenu(
     t: Transaction,
     currency: CurrencySettings,
     onClick: () -> Unit,
@@ -362,70 +423,55 @@ fun SwipeableTransactionRow(
 ) {
     var menu by remember { mutableStateOf(false) }
     val hasActions = onDelete != null || onDuplicate != null
-    val row: @Composable () -> Unit = {
-        Box {
-            TransactionRow(t, currency, onClick, onLongClick = if (hasActions) ({ menu = true }) else null)
-            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+    Box {
+        TransactionRow(t, currency, onClick, onLongClick = if (hasActions) ({ menu = true }) else null)
+        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.edit)) },
+                leadingIcon = { Icon(Icons.Default.Edit, null) },
+                onClick = { menu = false; onClick() },
+            )
+            if (onDuplicate != null) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.edit)) },
-                    leadingIcon = { Icon(Icons.Default.Edit, null) },
-                    onClick = { menu = false; onClick() },
+                    text = { Text(stringResource(R.string.duplicate)) },
+                    leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
+                    onClick = { menu = false; onDuplicate(t) },
                 )
-                if (onDuplicate != null) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.duplicate)) },
-                        leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
-                        onClick = { menu = false; onDuplicate(t) },
-                    )
-                }
-                if (onDelete != null) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.delete)) },
-                        leadingIcon = { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error) },
-                        onClick = { menu = false; onDelete(t) },
-                    )
-                }
+            }
+            if (onDelete != null) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.delete)) },
+                    leadingIcon = { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error) },
+                    onClick = { menu = false; onDelete(t) },
+                )
             }
         }
     }
-    if (onDelete == null) {
-        row()
-        return
-    }
-    var deleted by remember(t.id) { mutableStateOf(false) }
-    val state = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.EndToStart && !deleted) {
-                deleted = true
-                onDelete(t)
-            }
-            // Spring back; the row disappears when the list reloads, and a restored row starts clean.
-            false
-        },
+}
+
+private val DAY_HEADER_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM yy, EEE", Locale.getDefault())
+
+/** Small rounded label with a day's income or expense total. */
+@Composable
+private fun DayTotalPill(amount: BigDecimal, type: CatType, currency: CurrencySettings) {
+    val colors = LocalMonitoColors.current
+    Text(
+        AmountFormatter.format(amount, currency),
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.Bold,
+        color = amountColor(type),
+        maxLines = 1,
+        modifier = Modifier
+            .background(if (type == CatType.EXPENSE) colors.expenseContainer else colors.incomeContainer, RoundedCornerShape(50))
+            .padding(horizontal = 10.dp, vertical = 2.dp),
     )
-    SwipeToDismissBox(
-        state = state,
-        enableDismissFromStartToEnd = false,
-        backgroundContent = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.errorContainer)
-                    .padding(horizontal = 24.dp),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = MaterialTheme.colorScheme.onErrorContainer)
-            }
-        },
-    ) {
-        Surface(color = MaterialTheme.colorScheme.background) { row() }
-    }
 }
 
 /**
  * Emits the transaction list grouped by month and day with daily totals, the way the original list
- * showed month labels and day headers. Use inside a LazyColumn. When [onDelete] is given, rows can
- * be swiped away; when [onDuplicate] is given, long pressing offers a copy.
+ * showed month labels and day headers. Use inside a LazyColumn. Long pressing a row offers
+ * Edit / Duplicate / Delete when [onDelete] / [onDuplicate] are given; tapping a day header calls
+ * [onDateClick] so a transaction can be added for that day.
  */
 fun LazyListScope.transactionItems(
     transactions: List<Transaction>,
@@ -434,17 +480,22 @@ fun LazyListScope.transactionItems(
     onClick: (Transaction) -> Unit,
     onDelete: ((Transaction) -> Unit)? = null,
     onDuplicate: ((Transaction) -> Unit)? = null,
+    onDateClick: ((LocalDate) -> Unit)? = null,
 ) {
     val byMonth = transactions.groupBy { YearMonth.from(it.date) }
     for ((ym, monthList) in byMonth) {
         if (showMonthLabels) {
             item(key = "m-$ym") {
-                Text(
-                    ym.title(),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
-                )
+                Box(Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 2.dp), contentAlignment = Alignment.Center) {
+                    Text(
+                        ym.title(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f), RoundedCornerShape(50))
+                            .padding(horizontal = 14.dp, vertical = 4.dp),
+                    )
+                }
             }
         }
         val byDay = monthList.groupBy { it.date }
@@ -455,23 +506,25 @@ fun LazyListScope.transactionItems(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                        .then(if (onDateClick != null) Modifier.clickable { onDateClick(day) } else Modifier)
+                        .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(day.pretty(), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-                    if (income.signum() > 0) {
-                        AmountText(income, CatType.INCOME, currency, style = MaterialTheme.typography.labelMedium, signed = true)
-                    }
-                    if (income.signum() > 0 && expense.signum() > 0) Spacer(Modifier.width(10.dp))
-                    if (expense.signum() > 0) {
-                        AmountText(expense, CatType.EXPENSE, currency, style = MaterialTheme.typography.labelMedium, signed = true)
-                    }
+                    Text(day.dayOfMonth.toString(), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Light)
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        day.format(DAY_HEADER_FORMAT),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (income.signum() > 0) DayTotalPill(income, CatType.INCOME, currency)
+                    if (income.signum() > 0 && expense.signum() > 0) Spacer(Modifier.width(6.dp))
+                    if (expense.signum() > 0) DayTotalPill(expense, CatType.EXPENSE, currency)
                 }
             }
             items(dayList, key = { "t-${it.id}" }) { t ->
-                SwipeableTransactionRow(t, currency, onClick = { onClick(t) }, onDelete = onDelete, onDuplicate = onDuplicate)
-                HorizontalDivider(modifier = Modifier.padding(start = 68.dp), color = MaterialTheme.colorScheme.surfaceVariant)
+                TransactionRowWithMenu(t, currency, onClick = { onClick(t) }, onDelete = onDelete, onDuplicate = onDuplicate)
             }
         }
     }

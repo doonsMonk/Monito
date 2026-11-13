@@ -352,4 +352,20 @@
         <item quantity="one">%d recurring transaction added</item>
         <item quantity="other">%d recurring transactions added</item>
     </plurals>
+    <string name="assign_different_colors">Give each category a different colour</string>
+    <string name="assign_different_colors_desc">Categories that share a colour will get another one from the palette, so they are easier to tell apart. You can still change any colour by editing the category.</string>
+    <string name="colors_updated">%1$d categories recoloured</string>
+    <string name="updates">Updates</string>
+    <string name="check_for_updates">Check for updates</string>
+    <string name="checking">Checking…</string>
+    <string name="installed_version">Installed version %1$s</string>
+    <string name="update_available">Version %1$s is available</string>
+    <string name="update_available_desc">You have version %1$s. Download version %2$s, open the file and choose Update. Your data stays as it is; do not uninstall the app first.</string>
+    <string name="up_to_date">You are up to date</string>
+    <string name="up_to_date_desc">Version %1$s is the latest version.</string>
+    <string name="update_check_failed">Could not check for updates</string>
+    <string name="update_check_failed_desc">Check your internet connection and try again.</string>
+    <string name="download">Download</string>
+    <string name="later">Later</string>
+    <string name="save_transaction">Save transaction</string>
 </resources>
